@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=800, height=480, user-scalable=no;" />
+        <style>
+            body
+            {
+                padding:0px;
+                margin:0px;
+            }
+
+            @font-face
+            {
+                font-family: 'finalscore';
+                src: url('Albert.ttf') format('truetype');
+                font-weight:bold;
+                font-style:normal;
+            }
+        </style>
+        <script type="text/javascript">
+            // provide our own console if it does not exist, huge dev aid!
+            if(typeof window.console == "undefined")
+            {
+                window.console = {log:function(str){window.external.Notify(str);}};
+            }
+            // output any errors to console log, created above.
+            window.onerror=function(e)
+            {
+                console.log("window.onerror ::" + JSON.stringify(e));
+            };
+            console.log("Installed console ! ");
+        </script>
+        <script type="text/javascript" charset="utf-8" src="phonegap-1.3.0.js"></script> 
+        <script type="text/javascript">
+            var can,ctx;  
+            var ratiox,ratioy,Counter=0;
+            var maxscale,minscale,GameMode=0;
+            var Splash=0,Game=1,TouchToCon=2;
+            var timecount=0,seconds =0,minits=0;
+            /////////////////////////////////
+            var imgBall,iscont;
+            var objBall=new Array(20);
+            
+            function initialization()
+            {
+                can=document.getElementById("Ballgame");
+                ctx=can.getContext("2d");
+                ratiox=can.width/800;
+                ratioy=can.height/480;
+                if(ratiox>ratioy){
+                    maxscale=ratiox;
+                    minscale=ratioy;
+                }else{
+                    maxscale=ratioy;
+                    minscale=ratiox;
+                }
+                imgBg=document.getElementById("splash");
+              /////////  Game
+                imgGameBg=document.getElementById("gamebg");
+                imgTostart=document.getElementById("touch2start");
+                imgBall=document.getElementById("ball");
+                document.addEventListener('mousedown',PointerPress,false);
+                document.addEventListener('mouseup',PointerRelese,false);
+                init();
+                setInterval(draw,15);
+				
+            }
+            
+            function init()
+            {
+               
+                timecount=0;
+                seconds =0; 
+                minits=0;
+               
+                iscont=false;
+                for(var i=0;i<50;i++){
+                    objBall[i]=new Ball(50+(i*30),Math.floor(Math.random()*350+80),0,0,Math.floor(Math.random()*330+10),Math.floor(Math.random()*10+2),8)
+                }
+            }
+	        function draw()
+            {
+               
+                //  var GameMode,Splash=1,Mainmenu=2,Game=3,TouchToCon=4;
+                ctx.clearRect(0,0,can.width,can.height);
+                switch(GameMode)
+                {
+                    case Splash:
+                        ctx.drawImage(imgBg,0,0,can.width,can.height);   
+                        Counter++;
+                        if(Counter>40){
+                            GameMode=TouchToCon;
+                            Counter=0;
+                        }
+                        break;
+                 
+                    case Game:
+                    case TouchToCon:
+                        if(Game==GameMode){
+                            try{
+                                process();
+                            }catch(e){
+                                
+                            }
+                        }
+                        ctx.drawImage(imgGameBg,0,0,can.width,can.height);   
+                        
+                        for(var i=0;i<20;i++){
+                            ctx.save();
+                            ctx.translate(objBall[i].x,objBall[i].y);
+                            ctx.drawImage(imgBall,0,0,25,25);   
+                            ctx.restore();    
+                        }
+                        if(TouchToCon==GameMode){
+                                ctx.drawImage(imgTostart,(can.width-(128*minscale))/2,(can.height-(128*minscale))/2,128*minscale,128*minscale);       
+                        }
+                        break;
+                }
+            }
+            
+        
+        
+            
+            function Ball(ballx,bally,vx,vy,angle,speed,radians)
+            {
+                this.x=ballx;
+                this.y=bally;
+                this.vx=vx;
+                this.vy=vy;
+                this.radians=radians;
+                this.angle=angle;
+                this.speed=speed;
+                this.counter=1;
+                this.frameNo=0;
+                this.isAlive=true;
+                this.dir=1;
+            }
+            
+                
+            Ball.prototype.runs = function()    // Define Method
+            {
+                //this.speed-=0.2;
+                if(this.speed<0)
+                {
+                    this.speed=0;
+                }
+                this.radians=this.angle*Math.PI/180;
+                this.vx=Math.cos(this.radians)*this.speed;
+                this.vy=Math.sin(this.radians)*this.speed; 
+                if(this.y+this.vy<=10)
+                {
+                    this.angle=-this.angle;
+                }else if(this.y+this.vy>=470)
+                {
+                    this.angle=-this.angle;
+                }else if(this.x+this.vx>=760)
+                {
+                    this.vx=-2;
+                    if( this.angle>=-360 &&  this.angle<-270)
+                    {
+                      
+                        this.angle=this.angle+90;
+                    }
+                    else if( this.angle>270 &&  this.angle<=360)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=-270 &&  this.angle<-180)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=180 &&  this.angle<270)
+                    {
+                        this.angle= this.angle+90;
+                    }
+                    else if( this.angle>=-180 &&  this.angle<-90)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=90 &&  this.angle<180)
+                    {
+                        this.angle= this.angle+90;
+                    }
+                    else if( this.angle>=-90 &&  this.angle<0)
+                    {
+                        this.angle=360-(90- this.angle);
+                    }
+                    else if( this.angle>=0 &&  this.angle<=90)
+                    {
+                        this.angle=360-(90- this.angle);
+                    } 
+                }else if(this.x+this.vx<=30)
+                {
+                    this.vx=-2;
+                    if( this.angle>=-360 &&  this.angle<-270)
+                    {
+                        this.angle=this.angle+90;
+                    }
+                    else if( this.angle>270 &&  this.angle<=360)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=-270 &&  this.angle<-180)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=180 &&  this.angle<270)
+                    {
+                        this.angle= this.angle+90;
+                    }
+                    else if( this.angle>=-180 &&  this.angle<-90)
+                    {
+                        this.angle= this.angle-90;
+                    }
+                    else if( this.angle>=90 &&  this.angle<180)
+                    {
+                        this.angle= this.angle+90;
+                    }
+                    else if( this.angle>=-90 &&  this.angle<0)
+                    {
+                        this.angle=360-(90- this.angle);
+                    }
+                    else if( this.angle>=0 &&  this.angle<=90)
+                    {
+                        this.angle=360-(90- this.angle);
+                    }
+                }
+                this.x=this.x+this.vx;
+                this.y=this.y+this.vy;
+            
+            }	
+		  
+            
+            function process()
+            {
+                
+                timecount++;
+                seconds = Math.ceil((timecount/(1000/20)) % 60);
+                if(seconds>=60){
+                    minits = Math.ceil((timecount/ (1000/20)) / 60);
+                    seconds=0;
+                }
+                
+                for(var i=0;i<20;i++){
+                    objBall[i].runs(); 
+                }
+              
+          
+               
+            }
+			
+            function iscollied(x1,y1,w1, h1, x2, y2,w2,h2) {
+                if (x1 + w1 > x2 && x1 < x2 + w2 && y1 + h1 > y2 && y1 < y2 + h2) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            function  hasPoint(x1,y1,x,y,w,h) {
+                return (x < x1 && x + w > x1 && y < y1 && y + h > y1);
+            }
+		    function PointerRelese(event){	
+                 pressx=event.pageX;
+                 pressy=event.pageY;   
+                 switch(GameMode){
+                   case Game:
+                       break;
+                    case TouchToCon:
+                        GameMode=Game;
+                        console.log(GameMode)
+                       break;
+                }
+            
+            }
+            function PointerPress(event)     
+            {
+                pressx=event.pageX;
+                pressy=event.pageY;  
+               switch(GameMode){
+                    case Game:
+                        break;
+                    case TouchToCon:
+                        break;
+                }
+            }
+        </script>
+    </head>
+    <body onLoad="initialization();">
+        <canvas id="Ballgame" width="800" height="480"></canvas>
+        <img id="splash" src="splash.jpg" style="display: none"/>
+        <img id="gamebg" src="gamebg.png" style="display: none"/>
+        <img id="ball" src="ball1.png" style="display: none"/>
+        <img id="touch2start" src="touch2start.png" style="display: none"/>      
+    </body>
+</html>
